@@ -1,0 +1,36 @@
+.users-form{
+    width: 100px;
+    max-width: 95%;
+    margin: auto;
+}
+
+.form-control{
+    margin: 5px 0;
+}
+
+.form-control label,
+.form-control input {
+    display: block;
+    width: 100%;
+}
+
+.form-control input{
+    border: 1px solid black;
+    font: inherit;
+    border-radius: 2px;
+}
+
+button{
+    font: inherit;
+    border: 1px solid black;
+    color: red;
+    background: white;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+button:hover,
+button:active {
+    background-color: blanchedalmond;
+    color: green;
+}

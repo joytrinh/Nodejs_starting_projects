@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/users.css">
+</head>
+<body>
+    <header class="main-header">
+        <nav class="main-header_nav">
+            <ul class="main-header_item-list">
+                <li class="main-header_item"><a href="/">Home</a></li>
+                <li class="main-header_item"><a class="active" href="/admin/users">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <form class="users-form" action="/admin/users" method="POST">
+            <div class="form-control">
+                <label for="id">ID:</label></br>
+                <input type="text" name="id" id="id"></br>
+                <label for="password">Password:</label></br>
+                <input type="text" name="password" id="password"></br></br>
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+    </main>   
+</body>
+</html>
