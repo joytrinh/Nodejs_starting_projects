@@ -7,7 +7,7 @@ router.get('/users',(req,res,next)=>{ // '/admin/users' we can omit /admin here
     res.sendFile(path.join(rootDir,'views','users.html'))//__dirname = current folder
 })
 router.post('/users',(req,res,next)=>{// '/admin/users' we can omit /admin here
-    console.log(req.body)
+//    console.log(req.body)
     res.redirect('/')
 })
 module.exports = router
