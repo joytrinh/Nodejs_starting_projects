@@ -15,8 +15,11 @@ const getProductsFromFile = cb => {
     })
 }
 module.exports = class Product {
-    constructor(t){//create an object based on this class where I can pass a title into the constructor
-        this.title = t
+    constructor(title, imageURL, price, description){//create an object based on this class where I can pass a title into the constructor
+        this.title = title
+        this.imageURL = imageURL
+        this.price = price
+        this.description = description        
     }
     //This is a function but no "function" keyword
     save(){//store products in an array and fetch it
