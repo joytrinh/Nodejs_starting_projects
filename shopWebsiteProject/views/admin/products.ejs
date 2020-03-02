@@ -20,16 +20,17 @@
                         <p class="product_description"><%= product.description %></p>
                     </div>
                     <div class="card_actions">
-                        <a href="/admin/edit-product" class="btn">Edit</a>
-                        <form action="/delete-product" method="POST">
-                            <button class="btn">Delete</button>
+                        <a href="/admin/edit-product/<%= product.id %>?edit=true" class="btn">Edit</a>
+                        <form action="/admin/delete-product" method="POST">
+                            <input type="hidden" value="<%= product.id %>" name="productId">
+                            <button class="btn" type="submit">Delete</button>
                         </form>
                     </div>
                 </article>
                 <% } %>  
             </div>
         <% } else { %>  
-            <h1>No products found!</h1>
+            <h1>No Products Found!</h1>
         <% } %>    
     </main>
 <%- include('../includes/end.ejs') %>
