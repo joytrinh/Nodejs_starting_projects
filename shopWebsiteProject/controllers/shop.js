@@ -1,5 +1,5 @@
 const Product = require('../models/product')
-const Cart = require('../models/cart')
+const Order = require('../models/order')
 
 exports.getProducts = (req, res, next) => {
   Product.findAll()
@@ -100,22 +100,64 @@ exports.postCart = (req, res, next) => {
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId
-  Product.findById(prodId, product => {
-    Cart.deleteProduct(prodId, product.price)
+  req.user
+  .getCart()
+  .then(cart => {
+    return cart.getProducts({where: {id: prodId}})
+  })
+  .then(products => {
+    let product = products[0]
+    return product.cartItem.destroy()
+  })
+  .then(result => {
     res.redirect('/cart')
   })
+  .catch(err => {console.log(err)})
 }
-
+exports.postOrder = (req, res, next) => {
+  let fetchedCart
+  req.user.getCart()
+  .then(cart => {
+    fetchedCart = cart
+    return cart.getProducts()
+  })
+  .then(products => {
+    return req.user
+    .createOrder()
+    .then(order => {
+      return order.addProducts(
+        products.map(product => {
+          product.orderItem = {quantity: product.cartItem.quantity}
+          return product
+        })
+      )
+    })
+    .then(result => {
+      return fetchedCart.setProducts(null)//remove all of items in the cart
+    })
+    .then(result => {
+      res.redirect('/orders')
+    })
+    .catch(err => {console.log(err)})
+  })
+  .catch(err => {console.log(err)})
+}
 exports.getOrders = (req, res, next) => {
-  res.render('shop/orders', {
-    path: '/orders',
-    pageTitle: 'Your Orders'
+  req.user
+  .getOrders({include: ['products']})
+  /*if you are fetching all the orders, please also fetch all related products already 
+  and give me back one array of orders that also includes the products per order.
+  Now this only works of course because we do have a relation between orders and products
+  as set up in app.js here and now we can load both together.
+  Each order will now have a products array
+  */
+  .then(orders => {
+    res.render('shop/orders', {
+      path: '/orders',
+      pageTitle: 'Your Orders',
+      orders: orders//the orders variable which simply stores all the retrieved orders. So with that I got my orders for this user
+    })
   })
-}
-
-exports.getCheckout = (req, res, next) => {
-  res.render('shop/checkout', {
-    path: '/checkout',
-    pageTitle: 'Checkout'
-  })
+  .catch(err => {console.log(err)})
+  
 }
