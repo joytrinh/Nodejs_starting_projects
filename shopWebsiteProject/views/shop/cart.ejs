@@ -8,10 +8,11 @@
             <ul class="cart__item-list">
                 <% products.forEach(p => { %>
                     <li class="cart__item">
-                        <h1><%= p.productData.title %></h1>
-                        <h2>Quantity: <%= p.qty %></h2>
+                        <h1><%= p.title %></h1>
+                        <h2>Quantity: <%= p.cartItem.quantity %></h2>
+<!--cartItem is this extra field that gets added by sequelize to give us access to this in-between table-->
                         <form action="/cart-delete-item" method="POST">
-                            <input type="hidden" name="productId" value="<%= p.productData.id %>">
+                            <input type="hidden" name="productId" value="<%= p.id %>">
                             <button class="btn danger" type="submit">Delete</button>
                         </form>
                     </li>

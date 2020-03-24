@@ -13,11 +13,13 @@ exports.postAddProduct = (req, res, next) => {
   const imageURL = req.body.imageURL
   const price = req.body.price
   const description = req.body.description
-  Product.create({
+  req.user
+  .createProduct({
     title: title,
     price: price,
     imageURL: imageURL,
-    description: description
+    description: description,
+    userId: req.user.id
   })
   .then(result => {
     // console.log(result)
@@ -25,10 +27,6 @@ exports.postAddProduct = (req, res, next) => {
     res.redirect('/admin/products')
   })
   .catch(err => {console.log(err)})
-  // const product = new Product(null, title, price, description, imageURL)
-  // product.save().then(()=>{
-  //   res.redirect('/')
-  // }).catch(err => console.log(err))  
 }
 
 exports.getEditProduct = (req, res, next) => {
@@ -37,8 +35,11 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect('/')
   }
   const prodId = req.params.productId
-  Product.findByPk(prodId)
-  .then(product => {
+  req.user
+  .getProducts({where: {id: prodId}})//this return an array
+  // Product.findByPk(prodId)
+  .then(products => {
+    const product = products[0]//we get the first element
     if (!product) {
       return res.redirect('/')
     }
@@ -80,7 +81,8 @@ exports.postEditProduct = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
-  Product.findAll()
+  req.user
+  .getProducts()//get all the products from the user
   .then(products => {
     res.render('admin/products', {
       prods: products,
