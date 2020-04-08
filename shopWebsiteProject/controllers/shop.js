@@ -51,63 +51,31 @@ exports.getIndex = (req, res, next) => {
 exports.getCart = (req, res, next) => {
   req.user
   .getCart()
-  .then(cart => {
-    return cart
-          .getProducts()//Cart.belongsToMany(Product)
-          .then(products => {
-            res.render('shop/cart', {
-              path: '/cart',
-              pageTitle: 'Your Cart',
-              products: products
-            })
-          })
-          .catch(err => {console.log(err)})
+  .then(products => {
+    res.render('shop/cart', {
+      path: '/cart',
+      pageTitle: 'Your Cart',
+      products: products
+    })
   })
   .catch(err => {console.log(err)})
-}
+  }
 
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId
-  let fetchedCart
-  let newQuantity = 1
-  req.user
-  .getCart()
-  .then(cart => {
-    fetchedCart = cart
-    return cart.getProducts({where: {id: prodId}})
-  })
-  .then(products => {//we get an array of products from above code
-    let product
-    if (products.length > 0)
-        product = products[0]    
-    if (product) {
-      const oldQuantity = product.cartItem.quantity//cartItem is this extra field that gets added by sequelize to give us access to this in-between table
-      newQuantity = oldQuantity + 1
-      return product
-    }
-    return Product.findByPk(prodId) 
-  })
+  Product.findByPk(prodId)
   .then(product => {
-    return fetchedCart.addProduct(product, 
-      {through: {quantity: newQuantity}})//another magic method added by sequelize for many to many relationships,
+    return req.user.addToCart(product)
   })
-  .then(()=>{
+  .then(result => {
     res.redirect('/cart')
   })
-  .catch(err => {console.log(err)}) 
 }
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId
   req.user
-  .getCart()
-  .then(cart => {
-    return cart.getProducts({where: {id: prodId}})
-  })
-  .then(products => {
-    let product = products[0]
-    return product.cartItem.destroy()
-  })
+  .deleteItemFromCart(prodId)
   .then(result => {
     res.redirect('/cart')
   })
@@ -131,13 +99,13 @@ exports.postOrder = (req, res, next) => {
         })
       )
     })
-    .then(result => {
-      return fetchedCart.setProducts(null)//remove all of items in the cart
-    })
-    .then(result => {
-      res.redirect('/orders')
-    })
     .catch(err => {console.log(err)})
+  })
+  .then(result => {
+    return fetchedCart.setProducts(null)//remove all of items in the cart
+  })
+  .then(result => {
+    res.redirect('/orders')
   })
   .catch(err => {console.log(err)})
 }
