@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
 const errorController = require("./controllers/error");
-// const User = require("./models/user");
+const User = require("./models/user");
 
 const app = express();
 
@@ -19,17 +19,19 @@ app.use(express.static(path.join(__dirname, "public")));
 
 //register a new middleware to store that user in my request so that I can use it everywhere
 //when the app starts, it will run sequelize firstly. This middleware only run when there is an incoming request
-// app.use((req, res, next) => {
-//   User.findByPk("5e8bed2d211812138bdf00a8")
-//     .then((user) => {
-//       req.user = new User(user.username, user.email, user.cart, user._id); //store the user in the request from the database, then we can use req.user
-//       //we create a new User(), so we can access User's methods
-//       next();
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//     });
-// });
+app.use((req, res, next) => {
+  User.findById("5e8fdc355c17cd14818d0451")
+    .then((user) => {
+       //store the user in the request from the database, then we can use req.user      
+      req.user = user //we save req.user in user which is a full mongoose model so we can call 
+      // all these mongoose model functions or methods on that user object and therefore also 
+      // on the user object which I do store here.
+      next();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 
@@ -39,7 +41,17 @@ mongoose
   .connect(
     "mongodb+srv://tuyentrinh:tuyen1234@cluster0-7dvwp.azure.mongodb.net/shop?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true"
   )
-  .then((result) => {
+  .then(result => {
+    User.findOne().then(user => {
+      if (!user) {
+        const user = new User({
+          name: 'joy',
+          email: 'test@test.com',
+          cart: { items: [] }
+        });
+        user.save()
+      }
+    })
     app.listen(3000);
-  })
+  }) 
   .catch((err) => console.log(err));

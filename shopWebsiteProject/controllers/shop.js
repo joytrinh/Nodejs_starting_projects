@@ -46,8 +46,11 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
   req.user
-    .getCart()
-    .then((products) => {
+    .populate('cart.items.productId')
+    .execPopulate() //req.user.populate(...).then is not a function => we must write this function
+    .then(user => {
+      // console.log(user.cart.items) we should see the position of title, quantity, id of the product and modify cart.ejs
+      const products = user.cart.items
       res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
@@ -73,7 +76,7 @@ exports.postCart = (req, res, next) => {
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   req.user
-    .deleteItemFromCart(prodId)
+    .removeFromCart(prodId)
     .then((result) => {
       res.redirect("/cart");
     })

@@ -18,6 +18,7 @@ exports.postAddProduct = (req, res, next) => {
     price: price,
     description: description,
     imageURL: imageURL,
+    userId: req.user, //we can pass an user obj here, via ref, mongoose only get user._id
   });
   product
     .save() //this save() from mongoose, we don't need to write it
@@ -59,19 +60,20 @@ exports.postEditProduct = (req, res, next) => {
   const updatedPrice = req.body.price;
   const updatedimageURL = req.body.imageURL;
   const updatedDesc = req.body.description;
-  Product.findById(prodId).then(product => {
-    product.title = updatedTitle
-    product.price = updatedPrice
-    product.description = updatedDesc
-    product.imageURL = updatedimageURL
-    /*
+  Product.findById(prodId)
+    .then((product) => {
+      product.title = updatedTitle;
+      product.price = updatedPrice;
+      product.description = updatedDesc;
+      product.imageURL = updatedimageURL;
+      /*
     product.save() will now not be a javascript object with the data but we will have a full 
     mongoose object here with all the mongoose methods like save and if we call save on an 
     existing object, it will not be saved as a new one but the changes will be saved, so it will 
     automatically do an update behind the scenes.
     */
-    return product.save()
-  })
+      return product.save();
+    })
     .then((result) => {
       console.log("Updated product");
       res.redirect("/admin/products");
@@ -87,10 +89,18 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.find() //mongoose gives us this method to get an array of products. If you know you will
-    //query a large amounts of data, you should turn it into a cursor by adding find().cursor().then()
-    // or use pagination later
+  /* mongoose gives us this method to get an array of products. If you know you will
+    query a large amounts of data, you should turn it into a cursor by adding find().cursor().then()
+    or use pagination later
+    Populate allows you to tell mongoose to populate a certain field with all the detail information 
+    and not just the ID
+  */
+  Product.find()
+    // .select("title price -_id") //only show these field
+    // .populate("userId", "name") //without 'name', this method will show User with full properties instead of only
+    //id. But with 'name', it shows id and name
     .then((products) => {
+      console.log(products);
       res.render("admin/products", {
         prods: products,
         pageTitle: "Admin Products",
