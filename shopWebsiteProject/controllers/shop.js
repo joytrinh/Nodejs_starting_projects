@@ -1,7 +1,7 @@
 const Product = require("../models/product");
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) => {
       res.render("shop/product-list", {
         prods: products,
@@ -16,18 +16,10 @@ exports.getProducts = (req, res, next) => {
 
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
-  //Method 1:
-  // Product.findAll({where: {id: prodId}})
-  //       .then(([products]) => {
-  //         res.render('shop/product-detail', {
-  //           product: products[0],//in sequelize, there is no array
-  //           pageTitle: products[0].title,
-  //           path: '/products'
-  //         })
-  //       })
-  //       .catch(err => console.log(err))
-  //Method 2:
-  Product.findByPk(prodId)
+
+// So again findById here is not our own method, it's defined by mongoose. And best of all, we can
+// even pass a string to findByI dand mongoose will automatically convert this to an objectID,
+  Product.findById(prodId)//Product is mongoose model
     .then((product) => {
       res.render("shop/product-detail", {
         product: product, //in sequelize, there is no array
@@ -39,7 +31,7 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) => {
       res.render("shop/index", {
         prods: products,
@@ -69,7 +61,7 @@ exports.getCart = (req, res, next) => {
 
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.findByPk(prodId)
+  Product.findById(prodId)
     .then((product) => {
       return req.user.addToCart(product);
     })

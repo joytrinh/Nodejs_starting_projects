@@ -19,7 +19,7 @@ const productSchema = new Schema({
   }
 })
 
-
+module.exports = mongoose.model('Product', productSchema)//mongoose takes this name and create a collection named "products" in db
 
 // const mongodb = require('mongodb')
 // const getDb = require('../util/database').getDb
