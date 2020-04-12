@@ -1,4 +1,5 @@
 const Product = require("../models/product");
+const Order = require('../models/order')
 
 exports.getProducts = (req, res, next) => {
   Product.find()
@@ -86,8 +87,29 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 exports.postOrder = (req, res, next) => {
   req.user
-    .addOrder()
+    .populate('cart.items.productId')
+    .execPopulate()
+    .then(user => {
+/*The map() method creates a new array populated with the results of calling a provided function 
+on every element in the calling array.
+
+With ._doc we pull out all the data in that document we retrieved and store it in a new object which we save here as a product.*/
+      const products = user.cart.items.map(i => {
+        return {quantity: i.quantity, product: {...i.productId._doc}}
+      })
+      const order = new Order({
+        user: {
+          name: req.user.name,
+          userId: req.user._id
+        },
+        products: products
+      })
+      return order.save()
+    })
     .then(result => {
+      return req.user.clearCart()
+    })
+    .then(()=>{
       res.redirect('/orders');
     })
     .catch(err => {
@@ -95,15 +117,14 @@ exports.postOrder = (req, res, next) => {
     });
 };
 exports.getOrders = (req, res, next) => {
-  req.user
-    .getOrders()
+  Order.find({'user.userId': req.user._id})
     .then((orders) => {
       res.render("shop/orders", {
         path: "/orders",
         pageTitle: "Your Orders",
         orders: orders, //the orders variable which simply stores all the retrieved orders. So with that I got my orders for this user
       });
-    })
+    }) 
     .catch((err) => {
       console.log(err);
     });
