@@ -23,6 +23,14 @@ form {
   text-align: center;
 }
 
+.image {
+  height: 20rem;
+}
+
+.image img {
+  height: 100%;
+}
+
 .main-header {
   width: 100%;
   height: 3.5rem;
@@ -34,8 +42,10 @@ form {
 
 .main-header__nav {
   height: 100%;
-  display: none;
+  width: 100%;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .main-header__item-list {
@@ -50,14 +60,21 @@ form {
   padding: 0;
 }
 
-.main-header__item a {
+.main-header__item a,
+.main-header__item button {
+  font: inherit;
+  background: transparent;
+  border: none;
   text-decoration: none;
   color: white;
+  cursor: pointer;
 }
 
 .main-header__item a:hover,
 .main-header__item a:active,
-.main-header__item a.active {
+.main-header__item a.active,
+.main-header__item button:hover,
+.main-header__item button:active {
   color: #ffeb3b;
 }
 
@@ -137,6 +154,7 @@ form {
   z-index: 5;
   display: none;
 }
+
 .grid {
   display: flex;
   flex-wrap: wrap;
@@ -148,36 +166,34 @@ form {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
 }
 
-.card_header,
-.card_content {
+.card__header,
+.card__content {
   padding: 1rem;
 }
 
-.card_header h1,
-.card_content h1,
-.card_content h2,
-.card_content p {
+.card__header h1,
+.card__content h1,
+.card__content h2,
+.card__content p {
   margin: 0;
 }
 
-.card_image {
-  width: 300px;
-  height: 200px;
+.card__image {
+  width: 100%;
 }
 
-.card_image img {
-  width: 300px;
-  height: 200px;
+.card__image img {
+  width: 100%;
 }
 
-.card_actions {
-    padding: 1rem;
-    text-align: center;
+.card__actions {
+  padding: 1rem;
+  text-align: center;
 }
 
-.card_actions button,
-.card_actions a {
-    margin: 0 0.25rem;
+.card__actions button,
+.card__actions a {
+  margin: 0 0.25rem;
 }
 
 .btn {
@@ -217,12 +233,4 @@ form {
   #side-menu-toggle {
     display: none;
   }
-}
-
-.image {
-  height: 20rem;
-}
-
-.image img {
-  height: 100%;
 }

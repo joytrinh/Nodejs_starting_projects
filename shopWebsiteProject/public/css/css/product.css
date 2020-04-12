@@ -11,17 +11,17 @@
     margin: 1rem;
 }
 
-.product_title {
+.product__title {
     font-size: 1.2rem;
     text-align: center;
 }
 
-.product_price {
+.product__price {
     text-align: center;
     color: #4d4d4d;
     margin-bottom: 0.5rem;
 }
 
-.product_description {
+.product__description {
     text-align: center;
 }

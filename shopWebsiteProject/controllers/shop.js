@@ -8,6 +8,7 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
+        isAuthenticated: req.isLoggedIn
       });
     })
     .catch((err) => {
@@ -26,6 +27,7 @@ exports.getProduct = (req, res, next) => {
         product: product, //in sequelize, there is no array
         pageTitle: product.title,
         path: "/products",
+        isAuthenticated: req.isLoggedIn
       });
     })
     .catch((err) => console.log(err));
@@ -38,6 +40,7 @@ exports.getIndex = (req, res, next) => {
         prods: products,
         pageTitle: "Shop",
         path: "/",
+        isAuthenticated: req.isLoggedIn
       });
     })
     .catch((err) => {
@@ -56,6 +59,7 @@ exports.getCart = (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
+        isAuthenticated: req.isLoggedIn
       });
     })
     .catch((err) => {
@@ -123,6 +127,7 @@ exports.getOrders = (req, res, next) => {
         path: "/orders",
         pageTitle: "Your Orders",
         orders: orders, //the orders variable which simply stores all the retrieved orders. So with that I got my orders for this user
+        isAuthenticated: req.isLoggedIn
       });
     }) 
     .catch((err) => {
