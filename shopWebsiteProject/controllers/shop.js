@@ -8,7 +8,7 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
-        isAuthenticated: req.isLoggedIn
+        isAuthenticated: req.session.user
       });
     })
     .catch((err) => {
@@ -27,7 +27,7 @@ exports.getProduct = (req, res, next) => {
         product: product, //in sequelize, there is no array
         pageTitle: product.title,
         path: "/products",
-        isAuthenticated: req.isLoggedIn
+        isAuthenticated: req.session.user
       });
     })
     .catch((err) => console.log(err));
@@ -40,7 +40,7 @@ exports.getIndex = (req, res, next) => {
         prods: products,
         pageTitle: "Shop",
         path: "/",
-        isAuthenticated: req.isLoggedIn
+        isAuthenticated: req.session.user
       });
     })
     .catch((err) => {
@@ -49,9 +49,9 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  req.user
+  req.session.user
     .populate('cart.items.productId')
-    .execPopulate() //req.user.populate(...).then is not a function => we must write this function
+    .execPopulate() //req.session.user.populate(...).then is not a function => we must write this function
     .then(user => {
       // console.log(user.cart.items) we should see the position of title, quantity, id of the product and modify cart.ejs
       const products = user.cart.items
@@ -59,7 +59,7 @@ exports.getCart = (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
-        isAuthenticated: req.isLoggedIn
+        isAuthenticated: req.session.user
       });
     })
     .catch((err) => {
@@ -71,7 +71,7 @@ exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findById(prodId)
     .then((product) => {
-      return req.user.addToCart(product);
+      return req.session.user.addToCart(product);
     })
     .then((result) => {
       res.redirect("/cart");
@@ -80,7 +80,7 @@ exports.postCart = (req, res, next) => {
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  req.user
+  req.session.user
     .removeFromCart(prodId)
     .then((result) => {
       res.redirect("/cart");
@@ -90,7 +90,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
     });
 };
 exports.postOrder = (req, res, next) => {
-  req.user
+  req.session.user
     .populate('cart.items.productId')
     .execPopulate()
     .then(user => {
@@ -103,15 +103,15 @@ With ._doc we pull out all the data in that document we retrieved and store it i
       })
       const order = new Order({
         user: {
-          name: req.user.name,
-          userId: req.user._id
+          name: req.session.user.name,
+          userId: req.session.user._id
         },
         products: products
       })
       return order.save()
     })
     .then(result => {
-      return req.user.clearCart()
+      return req.session.user.clearCart()
     })
     .then(()=>{
       res.redirect('/orders');
@@ -121,13 +121,13 @@ With ._doc we pull out all the data in that document we retrieved and store it i
     });
 };
 exports.getOrders = (req, res, next) => {
-  Order.find({'user.userId': req.user._id})
+  Order.find({'user.userId': req.session.user._id})
     .then((orders) => {
       res.render("shop/orders", {
         path: "/orders",
         pageTitle: "Your Orders",
         orders: orders, //the orders variable which simply stores all the retrieved orders. So with that I got my orders for this user
-        isAuthenticated: req.isLoggedIn
+        isAuthenticated: req.session.user
       });
     }) 
     .catch((err) => {
