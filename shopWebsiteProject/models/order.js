@@ -1,4 +1,3 @@
-const Product = require("../models/product");
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 

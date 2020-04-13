@@ -5,7 +5,7 @@ exports.getAddProduct = (req, res, next) => {
     pageTitle: "Add Product",
     path: "/admin/add-product",
     editing: false,
-    isAuthenticated: req.session.user
+    isAuthenticated: req.session.isLoggedIn
   });
 };
 
@@ -19,7 +19,7 @@ exports.postAddProduct = (req, res, next) => {
     price: price,
     description: description,
     imageURL: imageURL,
-    userId: req.session.user, //we can pass an user obj here, via ref, mongoose only get user._id
+    userId: req.user //we can pass an user obj here, via ref, mongoose only get user._id
   });
   product
     .save() //this save() from mongoose, we don't need to write it
@@ -48,7 +48,7 @@ exports.getEditProduct = (req, res, next) => {
         path: "/admin/edit-product",
         editing: editMode,
         product: product,
-        isAuthenticated: req.session.user
+        isAuthenticated: req.session.isLoggedIn
       });
     })
     .catch((err) => {
@@ -107,7 +107,7 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: "Admin Products",
         path: "/admin/products",
-        isAuthenticated: req.session.user
+        isAuthenticated: req.session.isLoggedIn
       });
     })
     .catch((err) => {
