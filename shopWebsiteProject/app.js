@@ -7,10 +7,10 @@ const MongoDBStore = require('connect-mongodb-session')(session) //session is a 
 
 const errorController = require("./controllers/error");
 const User = require("./models/user");
-const MONGODB_URL = "mongodb+srv://tuyentrinh:tuyen1234@cluster0-7dvwp.azure.mongodb.net/shop?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true";
+const MONGODB_URI = "mongodb+srv://tuyentrinh:tuyen1234@cluster0-7dvwp.azure.mongodb.net/shop?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true";
 const app = express();
 const store = new MongoDBStore({
-  uri: MONGODB_URL,
+  uri: MONGODB_URI,
   collection: 'sessions'
 })
 
@@ -46,19 +46,9 @@ app.use(errorController.get404);
 
 mongoose
   .connect(
-    MONGODB_URL
+    MONGODB_URI
   )
   .then(result => {
-    User.findOne().then(user => {
-      if (!user) {
-        const user = new User({
-          name: 'joy',
-          email: 'test@test.com',
-          cart: { items: [] }
-        });
-        user.save()
-      }
-    })
     app.listen(3000);
   }) 
   .catch((err) => console.log(err));
