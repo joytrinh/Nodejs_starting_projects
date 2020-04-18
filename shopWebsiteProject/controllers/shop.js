@@ -7,8 +7,7 @@ exports.getProducts = (req, res, next) => {
       res.render("shop/product-list", {
         prods: products,
         pageTitle: "All Products",
-        path: "/products",
-        isAuthenticated: req.session.isLoggedIn
+        path: "/products"
       });
     })
     .catch((err) => {
@@ -26,8 +25,7 @@ exports.getProduct = (req, res, next) => {
       res.render("shop/product-detail", {
         product: product, //in sequelize, there is no array
         pageTitle: product.title,
-        path: "/products",
-        isAuthenticated: req.session.isLoggedIn
+        path: "/products"
       });
     })
     .catch((err) => console.log(err));
@@ -39,8 +37,7 @@ exports.getIndex = (req, res, next) => {
       res.render("shop/index", {
         prods: products,
         pageTitle: "Shop",
-        path: "/",
-        isAuthenticated: req.session.isLoggedIn
+        path: "/"
       });
     })
     .catch((err) => {
@@ -58,8 +55,7 @@ exports.getCart = (req, res, next) => {
       res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
-        products: products,
-        isAuthenticated: req.session.isLoggedIn
+        products: products
       });
     })
     .catch((err) => {
@@ -104,7 +100,7 @@ With ._doc we pull out all the data in that document we retrieved and store it i
       })
       const order = new Order({
         user: {
-          name: req.user.name,
+          email: req.user.email,
           userId: req.user
         },
         products: products
@@ -127,8 +123,7 @@ exports.getOrders = (req, res, next) => {
       res.render("shop/orders", {
         path: "/orders",
         pageTitle: "Your Orders",
-        orders: orders, //the orders variable which simply stores all the retrieved orders. So with that I got my orders for this user
-        isAuthenticated: req.session.isLoggedIn
+        orders: orders //the orders variable which simply stores all the retrieved orders. So with that I got my orders for this user 
       });
     }) 
     .catch((err) => {
