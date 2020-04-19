@@ -1,11 +1,10 @@
 const Product = require("../models/product");
 
 exports.getAddProduct = (req, res, next) => {
-  
   res.render("admin/edit-product", {
     pageTitle: "Add Product",
     path: "/admin/add-product",
-    editing: false
+    editing: false,
   });
 };
 
@@ -19,7 +18,7 @@ exports.postAddProduct = (req, res, next) => {
     price: price,
     description: description,
     imageURL: imageURL,
-    userId: req.user //we can pass an user obj here, via ref, mongoose only get user._id
+    userId: req.user, //we can pass an user obj here, via ref, mongoose only get user._id
   });
   product
     .save() //this save() from mongoose, we don't need to write it
@@ -47,7 +46,7 @@ exports.getEditProduct = (req, res, next) => {
         pageTitle: "Edit Product",
         path: "/admin/edit-product",
         editing: editMode,
-        product: product
+        product: product,
       });
     })
     .catch((err) => {
@@ -63,6 +62,9 @@ exports.postEditProduct = (req, res, next) => {
   const updatedDesc = req.body.description;
   Product.findById(prodId)
     .then((product) => {
+      if (product.userId.toString() !== req.user._id.toString()) {
+        return res.redirect("/");
+      }
       product.title = updatedTitle;
       product.price = updatedPrice;
       product.description = updatedDesc;
@@ -73,11 +75,10 @@ exports.postEditProduct = (req, res, next) => {
     existing object, it will not be saved as a new one but the changes will be saved, so it will 
     automatically do an update behind the scenes.
     */
-      return product.save();
-    })
-    .then((result) => {
-      console.log("Updated product");
-      res.redirect("/admin/products");
+      return product.save().then((result) => {
+        console.log("Updated product");
+        res.redirect("/admin/products");
+      });
     })
     .catch((err) => {
       console.log(err);
@@ -96,7 +97,7 @@ exports.getProducts = (req, res, next) => {
     Populate allows you to tell mongoose to populate a certain field with all the detail information 
     and not just the ID
   */
-  Product.find()
+  Product.find({ userId: req.user._id }) //only show products created by the current user
     // .select("title price -_id") //only show these field
     // .populate("userId", "name") //without 'name', this method will show User with full properties instead of only
     //id. But with 'name', it shows id and name
@@ -105,7 +106,7 @@ exports.getProducts = (req, res, next) => {
       res.render("admin/products", {
         prods: products,
         pageTitle: "Admin Products",
-        path: "/admin/products"
+        path: "/admin/products",
       });
     })
     .catch((err) => {
@@ -115,7 +116,7 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.findByIdAndRemove(prodId)
+  Product.deleteOne({_id: prodId, userId: req.user._id})
     .then(() => {
       console.log("Deleted product");
       res.redirect("/admin/products");
