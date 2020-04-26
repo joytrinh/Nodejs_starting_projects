@@ -2,7 +2,7 @@ const crypto = require("crypto"); // a nodejs library to create random unique va
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
-
+const { validationResult } = require("express-validator/check"); //a function that allows us to gather all the errors prior validation middleware
 const User = require("../models/user");
 
 const transporter = nodemailer.createTransport(
@@ -25,18 +25,43 @@ exports.getLogin = (req, res, next) => {
     path: "/login",
     pageTitle: "Login",
     errMessage: message,
+    oldInput: {
+      email: '',
+      password: ''
+    },
+    validationErrors: []
   });
 };
 
 exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
-
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/login", {
+      path: "/login",
+      pageTitle: "login",
+      errMessage: errors.array()[0].msg,
+      oldInput: {
+        email: email,
+        password: password
+      },
+      validationErrors: errors.array()
+    });
+  }
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
-        req.flash("error", "invalid email or password.");
-        return res.redirect("/login");
+        return res.status(422).render("auth/login", {
+          path: "/login",
+          pageTitle: "Login",
+          errMessage: "invalid email or password.",
+          oldInput: {
+            email: email,
+            password: password
+          },
+          validationErrors: []
+        });
       }
       bcrypt
         .compare(password, user.password)
@@ -81,6 +106,12 @@ exports.getSignup = (req, res, next) => {
     path: "/signup",
     pageTitle: "Signup",
     errMessage: message,
+    oldInput: {
+      email: '',
+      password: '',
+      confirmPassword: ''
+    },
+    validationErrors: []
   });
 };
 
@@ -88,40 +119,42 @@ exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
   const confirmPassword = req.body.confirmPassword;
-  User.findOne({ email: email })
-    .then((userDoc) => {
-      if (userDoc) {
-        req.flash(
-          "error",
-          "Email exists already, please choose a different one!"
-        );
-        return res.redirect("/signup");
-      }
-      return bcrypt
-        .hash(password, 12) // 12 is the most secure level
-        .then((cryptedPassword) => {
-          const user = new User({
-            email: email,
-            password: cryptedPassword,
-            cart: { items: [] },
-          });
-          user.save();
-        })
-        .then((result) => {
-          res.redirect("/login");
-          return transporter
-            .sendMail({
-              to: email,
-              from: "shop@joycheng.com",
-              subject: "Signup successully!",
-              html: "<h1>You successfully signed up!</h1>",
-            })
-            .catch((err) => console.log(err));
-        });
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/signup", {
+      path: "/signup",
+      pageTitle: "Signup",
+      errMessage: errors.array()[0].msg,
+      oldInput: {
+        email: email,
+        password: password,
+        confirmPassword: confirmPassword
+      },
+      validationErrors: errors.array()
+    });
+  }
+  bcrypt
+    .hash(password, 12) // 12 is the most secure level
+    .then((cryptedPassword) => {
+      const user = new User({
+        email: email,
+        password: cryptedPassword,
+        cart: { items: [] },
+      });
+      user.save();
     })
-    .catch((err) => console.log(err));
+    .then((result) => {
+      res.redirect("/login");
+      return transporter
+        .sendMail({
+          to: email,
+          from: "shop@joycheng.com",
+          subject: "Signup su  ccessully!",
+          html: "<h1>You successfully signed up!</h1>",
+        })
+        .catch((err) => console.log(err));
+    });
 };
-
 exports.getReset = (req, res, next) => {
   let message = req.flash("error");
   if (message.length) {
@@ -175,7 +208,7 @@ exports.postReset = (req, res, next) => {
 exports.getNewPassword = (req, res, next) => {
   const token = req.params.token;
   // User.findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() } })
-  User.findOne({ resetToken: token})
+  User.findOne({ resetToken: token })
     .then((user) => {
       let message = req.flash("error");
       if (message.length) {
@@ -198,25 +231,25 @@ exports.postNewPassword = (req, res, next) => {
   const newPassword = req.body.password;
   const userId = req.body.userId;
   const passwordToken = req.body.passwordToken;
-  let resetUser
+  let resetUser;
 
   User.findOne({
     resetToken: passwordToken,
     // resetTokenExpiration: { $gt: Date.now() },
     _id: userId,
   })
-  .then(user => {
-    resetUser = user
-    return bcrypt.hash(newPassword, 12)
-  })
-  .then(hashPassword => {
-    resetUser.password = hashPassword
-    resetUser.resetToken = undefined
-    resetUser.resetTokenExpiration = undefined
-    return resetUser.save()
-  })
-  .then(result => {
-    return res.redirect('/login')
-  })
-  .catch((err) => console.log(err));
+    .then((user) => {
+      resetUser = user;
+      return bcrypt.hash(newPassword, 12);
+    })
+    .then((hashPassword) => {
+      resetUser.password = hashPassword;
+      resetUser.resetToken = undefined;
+      resetUser.resetTokenExpiration = undefined;
+      return resetUser.save();
+    })
+    .then((result) => {
+      return res.redirect("/login");
+    })
+    .catch((err) => console.log(err));
 };
