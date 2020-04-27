@@ -1,19 +1,12 @@
 const Product = require("../models/product");
 const { validationResult } = require("express-validator/check");
 exports.getAddProduct = (req, res, next) => {
-
-  let message = req.flash("error");
-  if (message.length) {
-    message = message[0];
-  } else {
-    message = null;
-  }
   res.render("admin/edit-product", {
     pageTitle: "Add Product",
-    path: "/admin/edit-product",
+    path: "/admin/add-product",
     editing: false,
     hasError: false,
-    errMessage: message,
+    errMessage: null,
     validationErrors: []
   });
 };
@@ -28,14 +21,14 @@ exports.postAddProduct = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(422).render("admin/edit-product", {
       pageTitle: "Add Product",
-      path: "/admin/edit-product",
+      path: "/admin/add-product",
       editing: false,
       hasError: true,
       product: {
         title: title,
         imageURL: imageURL,
         price: price,
-        description: description
+        description: description,
       },
       errMessage: errors.array()[0].msg,
       validationErrors: errors.array()
@@ -48,7 +41,7 @@ exports.postAddProduct = (req, res, next) => {
     imageURL: imageURL,
     userId: req.user, //we can pass an user obj here, via ref, mongoose only get user._id
   });
-  
+
   product
     .save() //this save() from mongoose, we don't need to write it
     .then((result) => {
@@ -56,18 +49,15 @@ exports.postAddProduct = (req, res, next) => {
       res.redirect("/admin/products");
     })
     .catch((err) => {
-      console.log(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
 exports.getEditProduct = (req, res, next) => {
   const editMode = req.query.edit;
-  let message = req.flash("error");
-  if (message.length) {
-    message = message[0];
-  } else {
-    message = null;
-  }
+  
   if (!editMode) {
     return res.redirect("/");
   }
@@ -75,19 +65,22 @@ exports.getEditProduct = (req, res, next) => {
   Product.findById(prodId)
     .then((product) => {
       if (!product) {
-        return res.redirect('/')
+        return res.redirect("/");
       }
       res.render("admin/edit-product", {
         pageTitle: "Edit Product",
         path: "/admin/edit-product",
         editing: editMode,
         product: product,
-        errMessage: message,
+        hasError: false,
+        errMessage: null,
         validationErrors: []
       });
     })
     .catch((err) => {
-      console.log(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -136,7 +129,16 @@ exports.postEditProduct = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      // return res.redirect("/500");
+      /*
+      when we call next with an error passed as an argument, then we actually let express know that
+      an error occurred and it will skip all other middlewares and move right away to an error 
+      handling middleware. So next error is the trick here with an error object being passed 
+      instead of throwing it.
+      */
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
   /*
   this catch block would catch errors both for this first promise here 
@@ -165,18 +167,22 @@ exports.getProducts = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.deleteOne({_id: prodId, userId: req.user._id})
+  Product.deleteOne({ _id: prodId, userId: req.user._id })
     .then(() => {
       console.log("Deleted product");
       res.redirect("/admin/products");
     })
     .catch((err) => {
-      console.log(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
