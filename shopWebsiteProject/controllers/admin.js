@@ -13,12 +13,12 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageURL = req.body.imageURL;
+  // const imageURL = req.body.imageURL;
+  const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
   const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
+  if (!image) {
     return res.status(422).render("admin/edit-product", {
       pageTitle: "Add Product",
       path: "/admin/add-product",
@@ -26,14 +26,16 @@ exports.postAddProduct = (req, res, next) => {
       hasError: true,
       product: {
         title: title,
-        imageURL: imageURL,
         price: price,
         description: description,
       },
-      errMessage: errors.array()[0].msg,
-      validationErrors: errors.array()
-    });
+      errMessage: 'Attached file is not an image',
+      validationErrors: []
+    })
   }
+
+  const imageURL = image.path
+
   const product = new Product({
     title: title,
     price: price,
@@ -88,7 +90,7 @@ exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedimageURL = req.body.imageURL;
+  const updatedimage = req.file;
   const updatedDesc = req.body.description;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -99,7 +101,7 @@ exports.postEditProduct = (req, res, next) => {
       hasError: true,
       product: {
         title: updatedTitle,
-        imageURL: updatedimageURL,
+        // imageURL: updatedimageURL,
         price: updatedPrice,
         description: updatedDesc,
         _id: prodId
@@ -116,7 +118,9 @@ exports.postEditProduct = (req, res, next) => {
       product.title = updatedTitle;
       product.price = updatedPrice;
       product.description = updatedDesc;
-      product.imageURL = updatedimageURL;
+      if (updatedimage) {
+        product.imageURL = updatedimage.path;        
+      }
       /*
     product.save() will now not be a javascript object with the data but we will have a full 
     mongoose object here with all the mongoose methods like save and if we call save on an 
