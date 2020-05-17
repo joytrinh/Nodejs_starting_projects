@@ -1,3 +1,6 @@
+const mongoose = require('mongoose');
+
+const fileHelper = require('../util/file');
 const Product = require("../models/product");
 const { validationResult } = require("express-validator/check");
 exports.getAddProduct = (req, res, next) => {
@@ -13,11 +16,10 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  // const imageURL = req.body.imageURL;
   const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
-  const errors = validationResult(req);
+  
   if (!image) {
     return res.status(422).render("admin/edit-product", {
       pageTitle: "Add Product",
@@ -32,6 +34,24 @@ exports.postAddProduct = (req, res, next) => {
       errMessage: 'Attached file is not an image',
       validationErrors: []
     })
+  }
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors.array());
+    return res.status(422).render('admin/edit-product', {
+      pageTitle: 'Add Product',
+      path: '/admin/add-product',
+      editing: false,
+      hasError: true,
+      product: {
+        title: title,
+        price: price,
+        description: description
+      },
+      errMessage: errors.array()[0].msg,
+      validationErrors: errors.array()
+    });
   }
 
   const imageURL = image.path
@@ -119,7 +139,8 @@ exports.postEditProduct = (req, res, next) => {
       product.price = updatedPrice;
       product.description = updatedDesc;
       if (updatedimage) {
-        product.imageURL = updatedimage.path;        
+        fileHelper.deleteFile(product.imageURL);
+        product.imageURL = image.path;      
       }
       /*
     product.save() will now not be a javascript object with the data but we will have a full 
@@ -163,7 +184,7 @@ exports.getProducts = (req, res, next) => {
     // .populate("userId", "name") //without 'name', this method will show User with full properties instead of only
     //id. But with 'name', it shows id and name
     .then((products) => {
-      console.log(products);
+      // console.log(products);
       res.render("admin/products", {
         prods: products,
         pageTitle: "Admin Products",
@@ -179,9 +200,16 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.deleteOne({ _id: prodId, userId: req.user._id })
+  Product.findById(prodId)
+    .then(product => {
+      if (!product) {
+        return next(new Error('Product not found.'));
+      }
+      fileHelper.deleteFile(product.imageURL);
+      return Product.deleteOne({ _id: prodId, userId: req.user._id });
+    })
     .then(() => {
-      console.log("Deleted product");
+      console.log("Destroyed product");
       res.redirect("/admin/products");
     })
     .catch((err) => {

@@ -9,16 +9,16 @@ router.get("/add-product", isAuth, adminController.getAddProduct); // go from le
 
 router.post(
   "/add-product",
-  isAuth,
   [
     body(
       "title",
       "Please enter a title with minimum 10 characters and maximum 20 characters"
     )
-      .isLength({ min: 10, max: 20 })
+    .isString()  
+    .isLength({ min: 10, max: 20 })
       .trim(),
     // body("imageURL").isURL(),
-    check("price").isFloat({ gt: 0 }),
+    body("price").isFloat({ gt: 0 }),
     body(
       "description",
       "Please enter a description with minimum 10 characters and maximum 100 characters"
@@ -26,6 +26,7 @@ router.post(
       .isLength({ min: 10, max: 400 })
       .trim(),
   ],
+  isAuth,
   adminController.postAddProduct
 );
 
@@ -35,16 +36,16 @@ router.get("/edit-product/:productId", isAuth, adminController.getEditProduct);
 
 router.post(
   "/edit-product",
-  isAuth,
   [
     body(
       "title",
       "Please enter a title with minimum 10 characters and maximum 20 characters"
     )
+      .isString()
       .isLength({ min: 10, max: 20 })
       .trim(),
     // body("imageURL").isURL(),
-    check("price").isFloat({ gt: 0 }),
+    body("price").isFloat({ gt: 0 }),
     body(
       "description",
       "Please enter a description with minimum 10 characters and maximum 100 characters"
@@ -52,6 +53,7 @@ router.post(
       .isLength({ min: 10, max: 400 })
       .trim(),
   ],
+  isAuth,
   adminController.postEditProduct
 );
 

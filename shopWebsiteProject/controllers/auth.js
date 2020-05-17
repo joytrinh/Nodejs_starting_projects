@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport(
   sendgridTransport({
     auth: {
       api_key:
-        "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",
+        "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",
     },
   })
 ); // pass a function here return a configuration that nodemailer can use to use sendgrid.
@@ -33,6 +33,25 @@ exports.getLogin = (req, res, next) => {
   });
 };
 
+exports.getSignup = (req, res, next) => {
+  let message = req.flash("error");
+  if (message.length) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+  res.render("auth/signup", {
+    path: "/signup",
+    pageTitle: "Signup",
+    errMessage: message,
+    oldInput: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+    validationErrors: [],
+  });
+};
 exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -99,32 +118,6 @@ exports.postLogin = (req, res, next) => {
     });
 };
 
-exports.postLogout = (req, res, next) => {
-  req.session.destroy(() => {
-    res.redirect("/");
-  });
-};
-
-exports.getSignup = (req, res, next) => {
-  let message = req.flash("error");
-  if (message.length) {
-    message = message[0];
-  } else {
-    message = null;
-  }
-  res.render("auth/signup", {
-    path: "/signup",
-    pageTitle: "Signup",
-    errMessage: message,
-    oldInput: {
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
-    validationErrors: [],
-  });
-};
-
 exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -138,7 +131,7 @@ exports.postSignup = (req, res, next) => {
       oldInput: {
         email: email,
         password: password,
-        confirmPassword: confirmPassword
+        confirmPassword: req.body.confirmPassword
       },
       validationErrors: errors.array()
     });
@@ -151,24 +144,31 @@ exports.postSignup = (req, res, next) => {
         password: cryptedPassword,
         cart: { items: [] }
       });
-      user.save();
+      return user.save();
     })
     .then((result) => {
       res.redirect("/login");
-      return transporter
-        .sendMail({
-          to: email,
-          from: "shop@joycheng.com",
-          subject: "Signup successully!",
-          html: "<h1>You successfully signed up!</h1>"
+      // return transporter
+      //   .sendMail({
+      //     to: email,
+      //     from: "shop@joycheng.com",
+      //     subject: "Signup successully!",
+      //     html: "<h1>You successfully signed up!</h1>"
         })
         .catch((err) => {
           const error = new Error(err);
           error.httpStatusCode = 500;
           return next(error);
         });
-    });
 };
+
+exports.postLogout = (req, res, next) => {
+  req.session.destroy(err => {
+    console.log(err)
+    res.redirect("/");
+  });
+};
+
 exports.getReset = (req, res, next) => {
   let message = req.flash("error");
   if (message.length > 0) {
@@ -198,7 +198,7 @@ exports.postReset = (req, res, next) => {
         }
         user.resetToken = token;
         user.resetTokenExpiration = Date.now() + 3600000;
-        user.save(); // save in db
+        return user.save(); // save in db
       })
       // send token to user's email
       .then((result) => {
@@ -256,7 +256,7 @@ exports.postNewPassword = (req, res, next) => {
 
   User.findOne({
     resetToken: passwordToken,
-    // resetTokenExpiration: { $gt: Date.now() },
+    resetTokenExpiration: { $gt: Date.now() },
     _id: userId
   })
     .then((user) => {

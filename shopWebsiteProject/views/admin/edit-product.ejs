@@ -36,7 +36,7 @@
                 <textarea class="<%= validationErrors.find(e => e.param === 'description') ? 'invalid' : '' %>"
                 name="description" id="description" rows="5"><% if(editing || hasError) { %><%= product.description %><% } %></textarea>
             </div>
-            <% if (editing || hasError) { %>
+            <% if (editing) { %>
                 <input type="hidden" value="<%= product._id %>" name="productId">
             <% } %>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
