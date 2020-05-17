@@ -1,5 +1,5 @@
 const express = require("express");
-const { check, body } = require("express-validator/check"); //check() is the property of js object we pull
+const { check, body } = require("express-validator"); //check() is the property of js object we pull
 
 const router = express.Router();
 
@@ -10,7 +10,7 @@ router.get("/login", authController.getLogin);
 router.post(
   "/login",
   [
-    check("email")
+    body("email")
       .isEmail()
       .withMessage("Please enter a valid email.")
       .normalizeEmail(),
@@ -38,7 +38,7 @@ router.post(
         //   throw new Error("This email address is forbidden!");
         // }
         // return true;
-        User.findOne({ email: value }).then((userDoc) => {
+        return User.findOne({ email: value }).then((userDoc) => {
           if (userDoc) {
             return Promise.reject(
               "Email exists already, please choose a different one!"

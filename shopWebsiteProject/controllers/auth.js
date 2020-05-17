@@ -2,7 +2,7 @@ const crypto = require("crypto"); // a nodejs library to create random unique va
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
-const { validationResult } = require("express-validator/check"); //a function that allows us to gather all the errors prior validation middleware
+const { validationResult } = require("express-validator"); //a function that allows us to gather all the errors prior validation middleware
 const User = require("../models/user");
 
 const transporter = nodemailer.createTransport(
@@ -263,8 +263,8 @@ exports.postNewPassword = (req, res, next) => {
       resetUser = user;
       return bcrypt.hash(newPassword, 12);
     })
-    .then((hashPassword) => {
-      resetUser.password = hashPassword;
+    .then((hashedPassword) => {
+      resetUser.password = hashedPassword;
       resetUser.resetToken = undefined;
       resetUser.resetTokenExpiration = undefined;
       return resetUser.save();

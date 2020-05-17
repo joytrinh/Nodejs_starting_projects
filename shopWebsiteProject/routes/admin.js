@@ -1,9 +1,9 @@
+const path = require('path');
 const express = require("express");
-const { check, body } = require("express-validator/check");
+const { body } = require("express-validator");
 const adminController = require("../controllers/admin");
 const isAuth = require("../middleware/is-auth");
 const router = express.Router();
-const { validationResult } = require("express-validator/check");
 
 router.get("/add-product", isAuth, adminController.getAddProduct); // go from left to right
 
@@ -57,6 +57,6 @@ router.post(
   adminController.postEditProduct
 );
 
-router.post("/delete-product", isAuth, adminController.postDeleteProduct);
+router.delete('/product/:productId', isAuth, adminController.deleteProduct);
 
 module.exports = router;
