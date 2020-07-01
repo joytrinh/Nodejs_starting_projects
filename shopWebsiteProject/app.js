@@ -10,8 +10,11 @@ const multer = require("multer");
 
 const errorController = require("./controllers/error");
 const User = require("./models/user");
+
+console.log(process.env.NODE_ENV)
+
 const MONGODB_URI =
-  "mongodb+srv://tuyentrinh:tuyen1234@cluster0-7dvwp.azure.mongodb.net/shop?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true";
+  `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0-7dvwp.azure.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true`;
 const app = express();
 const store = new MongoDBStore({
   uri: MONGODB_URI,
@@ -104,6 +107,6 @@ app.use((error, req, res, next) => {
 mongoose
   .connect(MONGODB_URI)
   .then((result) => {
-    app.listen(3000);
+    app.listen(process.env.PORT || 3000);
   })
   .catch((err) => console.log(err));

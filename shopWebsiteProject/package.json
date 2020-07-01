@@ -5,8 +5,9 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js",
-    "start-server": "node app.js"
+    "start": "NODE_ENV=production MONGO_USER=tuyentrinh MONGO_PASSWORD=tuyen1234 MONGO_DEFAULT_DATABASE=shop STRIPE_KEY=sk_test_Flc1Upp19T0q8ZgmKGDVJUI400j9emUSTr node app.js",
+    "start-server": "node app.js",
+    "start:dev": "nodemon app.js"
   },
   "keywords": [
     "shop",
